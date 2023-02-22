@@ -296,7 +296,6 @@ protected:
 	dragSample _drag_down_sampled{};	// down sampled drag specific force data (filter prediction rate -> observation rate)
 
 	extVisionSample _ev_sample_prev{};
-	magSample _mag_sample_prev{};
 
 	RangeFinderConsistencyCheck _rng_consistency_check;
 

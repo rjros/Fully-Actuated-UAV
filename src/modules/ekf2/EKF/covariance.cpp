@@ -553,7 +553,7 @@ void Ekf::resetQuatCov()
 	initialiseQuatCovariances(rot_vec_var);
 
 	// update the yaw angle variance using the variance of the measurement
-	if (_params.mag_fusion_type <= MagFuseType::MAG_3D) {
+	if (_params.mag_fusion_type != MagFuseType::NONE) {
 		// using magnetic heading tuning parameter
 		increaseQuatYawErrVariance(sq(fmaxf(_params.mag_heading_noise, 1.0e-2f)));
 	}
