@@ -50,3 +50,31 @@
  * @return 0 on success, -errno otherwise
  */
 int px4_get_parameter_value(const char *option, int &value);
+
+/**
+ * Parse a CLI argument to a string. There are 2 valid formats:
+ * - 'p:<param_name>'
+ *   in this case the parameter is loaded from an integer parameter
+ *   that needs to be converted to string
+ * - <str>
+ *   a string, so just a copy is done
+ * @param option CLI argument
+ * @param value returned value
+ * @param n string size
+ * @return 0 on success, -errno otherwise
+ */
+int px4_get_parameter_value_str(const char *option, char *value, const size_t n);
+
+/**
+ * Parse a CLI argument to an IP address as string in decimal dot notation.
+ * There are 2 valid formats:
+ * - 'p:<param_name>'
+ *   in this case the parameter is loaded from an integer parameter that needs to be converted
+ * - <str>
+ *   a string, so just a copy is done
+ * @param option CLI argument
+ * @param value returned value
+ * @param n string size
+ * @return 0 on success, -errno otherwise
+ */
+int px4_get_parameter_value_ip(const char *option, char *value, const size_t n);

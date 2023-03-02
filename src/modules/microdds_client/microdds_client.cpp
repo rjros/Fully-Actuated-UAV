@@ -567,10 +567,11 @@ MicroddsClient *MicroddsClient::instantiate(int argc, char *argv[])
 	const char *device = nullptr;
 	int baudrate = 921600;
 
-	const char *port = "8888";
+	char port[6];
+	sprintf(port, "8888");
 	bool localhost_only = false;
 	bool custom_participant = false;
-	const char *ip = "127.0.0.1";
+	char ip[16] = "127.0.0.1";
 
 	const char *client_namespace = nullptr;//"px4";
 
@@ -605,11 +606,20 @@ MicroddsClient *MicroddsClient::instantiate(int argc, char *argv[])
 #if defined(MICRODDS_CLIENT_UDP)
 
 		case 'h':
-			ip = myoptarg;
+			if (px4_get_parameter_value_ip(myoptarg, ip, 16) != 0) {
+				PX4_ERR("Agent IP parsing failed");
+				error_flag = true;
+			}
+
 			break;
 
+
 		case 'p':
-			port = myoptarg;
+			if (px4_get_parameter_value_str(myoptarg, port, 6) != 0) {
+				PX4_ERR("UDP port parsing failed");
+				error_flag = true;
+			}
+
 			break;
 
 		case 'l':

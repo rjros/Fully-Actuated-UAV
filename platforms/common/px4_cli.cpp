@@ -87,3 +87,88 @@ int px4_get_parameter_value(const char *option, int &value)
 
 	return 0;
 }
+
+int px4_get_parameter_value_str(const char *option, char *value, const size_t n)
+{
+	/* check if this is a param name */
+	if (strncmp("p:", option, 2) == 0) {
+
+		const char *param_name = option + 2;
+
+		/* user wants to use a param name */
+		param_t param_handle = param_find(param_name);
+
+		if (param_handle != PARAM_INVALID) {
+
+			if (param_type(param_handle) != PARAM_TYPE_INT32) {
+				return -EINVAL;
+			}
+
+			int32_t param;
+			int ret = param_get(param_handle, &param);
+
+			if (ret != 0) {
+				return ret;
+			}
+
+#if defined(__PX4_POSIX)
+			// in posix int32_t is an int, so it requires %d
+			snprintf(value, n, "%d", param);
+#endif // __PX4_POSIX
+#if defined(__PX4_NUTTX)
+			// in posix int32_t is a long int, so it requires %ld
+			snprintf(value, n, "%ld", param);
+#endif // __PX4_NUTTX
+
+		} else {
+			PX4_ERR("param name '%s' not found", param_name);
+			return -ENXIO;
+		}
+
+	} else {
+		snprintf(value, n, "%s", option);
+	}
+
+	return 0;
+}
+
+int px4_get_parameter_value_ip(const char *option, char *value, const size_t n)
+{
+	/* check if this is a param name */
+	if (strncmp("p:", option, 2) == 0) {
+
+		const char *param_name = option + 2;
+
+		/* user wants to use a param name */
+		param_t param_handle = param_find(param_name);
+
+		if (param_handle != PARAM_INVALID) {
+
+			if (param_type(param_handle) != PARAM_TYPE_INT32) {
+				return -EINVAL;
+			}
+
+			int32_t param;
+			int ret = param_get(param_handle, &param);
+
+			if (ret != 0) {
+				return ret;
+			}
+
+			int addr1 = (int)(((param) >> 24) & 0xff);
+			int addr2 = (int)(((param) >> 16) & 0xff);
+			int addr3 = (int)(((param) >>  8) & 0xff);
+			int addr4 = (int)(((param)) & 0xff);
+			snprintf(value, n, "%d.%d.%d.%d", addr1, addr2, addr3, addr4);
+
+		} else {
+			PX4_ERR("param name '%s' not found", param_name);
+			return -ENXIO;
+		}
+
+	} else {
+		snprintf(value, n, "%s", option);
+	}
+
+	return 0;
+}
