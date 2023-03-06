@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2015 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2023 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,42 +31,57 @@
  *
  ****************************************************************************/
 
-/**
- * @file param.h
- *
- * Global flash based parameter store.
- *
- * This provides the mechanisms to interface to the PX4
- * parameter system but replace the IO with non file based flash
- * i/o routines. So that the code my be implemented on a SMALL memory
- * foot print device.
- *
- */
+#ifndef PX4_PARAMLAYER_H
+#define PX4_PARAMLAYER_H
 
-#ifndef _SYSTEMLIB_FLASHPARAMS_FLASHPARAMS_H
-#define _SYSTEMLIB_FLASHPARAMS_FLASHPARAMS_H
+#include "atomic_transaction.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <sys/types.h>
-#include "../ExhaustiveLayer.h"
+union ParamValueUnion {
+	float f;
+	int32_t i;
+};
 
-__BEGIN_DECLS
+enum class ParamType {
+	UNKNOWN = 0,
+	INT32 = 1,
+	FLOAT = 2
+};
 
-/*
- * When using the flash based parameter store we have to force
- * the param_values and 2 functions to be global
- */
+class ParamLayer
+{
+public:
+	static constexpr uint16_t PARAM_COUNT = sizeof(px4::parameters) / sizeof(param_info_s);
 
-__EXPORT extern ExhaustiveLayer user_config;
-__EXPORT int param_set_external(param_t param, const void *val, bool mark_saved, bool notify_changes);
-__EXPORT void param_get_external(param_t param, void *val);
+protected:
+	ParamLayer *_parent;
 
-/* The interface hooks to the Flash based storage. The caller is responsible for locking */
-__EXPORT int flash_param_save(param_filter_func filter);
-__EXPORT int flash_param_load();
-__EXPORT int flash_param_import();
+	static inline constexpr ParamType paramType(uint16_t param)
+	{
+		if (param < PARAM_COUNT) {
+			return (ParamType) px4::parameters_type[param];
+		}
 
-__END_DECLS
+		return ParamType::UNKNOWN;
+	}
 
-#endif /* _SYSTEMLIB_FLASHPARAMS_FLASHPARAMS_H */
+public:
+	ParamLayer(ParamLayer &parent) : _parent(&parent) {}
+
+	ParamLayer() : _parent(nullptr) {}
+
+	virtual bool store(uint16_t param, ParamValueUnion value) = 0;
+
+	virtual bool contains(uint16_t param) const = 0;
+
+	virtual ParamValueUnion get(uint16_t param) const = 0;
+
+	virtual void reset(uint16_t param) = 0;
+
+	virtual void refresh(uint16_t param) = 0;
+
+	virtual int size() const = 0;
+
+	virtual int byteSize() const = 0;
+};
+
+#endif //PX4_PARAMLAYER_H

@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2015 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2023 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,42 +31,54 @@
  *
  ****************************************************************************/
 
-/**
- * @file param.h
- *
- * Global flash based parameter store.
- *
- * This provides the mechanisms to interface to the PX4
- * parameter system but replace the IO with non file based flash
- * i/o routines. So that the code my be implemented on a SMALL memory
- * foot print device.
- *
- */
+#include "atomic_transaction.h"
+#include "px4_platform_common/micro_hal.h"
 
-#ifndef _SYSTEMLIB_FLASHPARAMS_FLASHPARAMS_H
-#define _SYSTEMLIB_FLASHPARAMS_FLASHPARAMS_H
+#ifndef px4_enter_critical_section
+#define px4_enter_critical_section() 0
+#endif
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <sys/types.h>
-#include "../ExhaustiveLayer.h"
+#ifndef px4_leave_critical_section
+#define px4_leave_critical_section(irq)
+#endif
 
-__BEGIN_DECLS
+int g_atomic_depth = 0;
+int g_irq = 0;
 
-/*
- * When using the flash based parameter store we have to force
- * the param_values and 2 functions to be global
- */
+void atomic_take_count()
+{
+	if (g_atomic_depth > 0) {
+		// always disable interrupts
+		g_atomic_depth ++;
+		return;
 
-__EXPORT extern ExhaustiveLayer user_config;
-__EXPORT int param_set_external(param_t param, const void *val, bool mark_saved, bool notify_changes);
-__EXPORT void param_get_external(param_t param, void *val);
+	} else {
+		// always disable interrupts
+		int irq = px4_enter_critical_section();
 
-/* The interface hooks to the Flash based storage. The caller is responsible for locking */
-__EXPORT int flash_param_save(param_filter_func filter);
-__EXPORT int flash_param_load();
-__EXPORT int flash_param_import();
+		if (g_atomic_depth == 0) {
+			g_irq = irq;
+		}
 
-__END_DECLS
+		g_atomic_depth++;
+	}
+}
 
-#endif /* _SYSTEMLIB_FLASHPARAMS_FLASHPARAMS_H */
+void atomic_release_count()
+{
+	if (g_atomic_depth > 0) {
+		g_atomic_depth--;
+
+		if (g_atomic_depth == 0) {
+			// release interrupts
+			px4_leave_critical_section(g_irq);
+		}
+	}
+}
+
+void atomic_release_all()
+{
+	while (g_atomic_depth > 0) {
+		atomic_release_count();
+	}
+}
