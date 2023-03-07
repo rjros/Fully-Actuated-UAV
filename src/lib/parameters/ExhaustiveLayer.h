@@ -106,7 +106,7 @@ public:
 
 	int size() const override
 	{
-		return _ownership_set.size();
+		return _ownership_set.count();
 	}
 
 	int byteSize() const override
