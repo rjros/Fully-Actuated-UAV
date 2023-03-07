@@ -113,13 +113,13 @@ static ExhaustiveLayer user_config{runtime_defaults};
 static orb_advert_t param_topic = nullptr;
 static unsigned int param_instance = 0;
 
-
 static perf_counter_t param_export_perf;
 static perf_counter_t param_find_perf;
 static perf_counter_t param_get_perf;
 static perf_counter_t param_set_perf;
 
-static pthread_mutex_t file_mutex  = PTHREAD_MUTEX_INITIALIZER; ///< this protects against concurrent param saves (file or flash access).
+static pthread_mutex_t file_mutex  =
+	PTHREAD_MUTEX_INITIALIZER; ///< this protects against concurrent param saves (file or flash access).
 
 void
 param_init()
@@ -375,12 +375,12 @@ autosave_worker(void *arg)
 		}
 	}
 
-    {
-        const AtomicTransaction transaction;
-        last_autosave_timestamp = hrt_absolute_time();
-        autosave_scheduled.store(false);
-        disabled = autosave_disabled;
-    }
+	{
+		const AtomicTransaction transaction;
+		last_autosave_timestamp = hrt_absolute_time();
+		autosave_scheduled.store(false);
+		disabled = autosave_disabled;
+	}
 
 	if (disabled) {
 		return;
@@ -763,10 +763,10 @@ int param_save_default()
 	}
 
 	// take the file lock
-    if (pthread_mutex_trylock(&file_mutex) != 0) {
-        PX4_ERR("param_save_default: file lock failed");
-        return PX4_ERROR;
-    }
+	if (pthread_mutex_trylock(&file_mutex) != 0) {
+		PX4_ERR("param_save_default: file lock failed");
+		return PX4_ERROR;
+	}
 
 	int res = PX4_ERROR;
 	const char *filename = param_get_default_file();
@@ -834,7 +834,7 @@ int param_save_default()
 		}
 	}
 
-    pthread_mutex_unlock(&file_mutex);
+	pthread_mutex_unlock(&file_mutex);
 
 	if (shutdown_lock_ret == 0) {
 		px4_shutdown_unlock();
@@ -996,9 +996,9 @@ param_export(const char *filename, param_filter_func filter)
 
 	// take the file lock
 	if (pthread_mutex_trylock(&file_mutex) != 0) {
-        PX4_ERR("param_export: file lock failed");
-        return PX4_ERROR;
-    }
+		PX4_ERR("param_export: file lock failed");
+		return PX4_ERROR;
+	}
 
 	int fd = ::open(filename, O_RDWR | O_CREAT, PX4_O_MODE_666);
 	int result = PX4_ERROR;
@@ -1014,7 +1014,7 @@ param_export(const char *filename, param_filter_func filter)
 
 	perf_end(param_export_perf);
 
-    pthread_mutex_unlock(&file_mutex);
+	pthread_mutex_unlock(&file_mutex);
 
 	if (shutdown_lock_ret == 0) {
 		px4_shutdown_unlock();

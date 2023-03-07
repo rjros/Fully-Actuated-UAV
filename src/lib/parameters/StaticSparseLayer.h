@@ -14,7 +14,7 @@ class StaticSparseLayer : public ParamLayer
 private:
 	struct Slot {
 		uint16_t param;
-        param_value_u value;
+		param_value_u value;
 	};
 
 	Slot _slots[N_SLOTS];
@@ -23,12 +23,12 @@ private:
 
 	static int _slotCompare(const void *a, const void *b)
 	{
-		return ((Slot *)a)->param - ((Slot *)b)->param;
+		return ((int)((Slot *)a)->param) - ((int)((Slot *)b)->param);
 	}
 
 	void _sort()
 	{
-		qsort(_slots, N_SLOTS, sizeof(param_value_u), &_slotCompare);
+		qsort(_slots, N_SLOTS, sizeof(Slot), &_slotCompare);
 	}
 
 	int _getIndex(uint16_t param) const
@@ -88,7 +88,7 @@ public:
 		return _getIndex(param) < N_SLOTS;
 	}
 
-    param_value_u get(uint16_t param) const override
+	param_value_u get(uint16_t param) const override
 	{
 		const AtomicTransaction transaction;
 		int index = _getIndex(param);

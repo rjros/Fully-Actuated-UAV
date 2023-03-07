@@ -40,7 +40,7 @@
 class ExhaustiveLayer : public ParamLayer
 {
 private:
-    param_value_u _values[PARAM_COUNT];
+	param_value_u _values[PARAM_COUNT];
 	px4::AtomicBitset<PARAM_COUNT> _ownership_set;
 
 public:
@@ -57,11 +57,13 @@ public:
 		if (param >= PARAM_COUNT) {
 			return false;
 		}
-        {
-            const AtomicTransaction _transaction;
-            _values[param] = value;
-            _ownership_set.set(param);
-        }
+
+		{
+			const AtomicTransaction _transaction;
+			_values[param] = value;
+			_ownership_set.set(param);
+		}
+
 		return true;
 	}
 
@@ -70,7 +72,7 @@ public:
 		return param < PARAM_COUNT && _ownership_set[param];
 	}
 
-    param_value_u get(uint16_t param) const override
+	param_value_u get(uint16_t param) const override
 	{
 		if (param >= PARAM_COUNT) {
 			return {0};
@@ -95,12 +97,13 @@ public:
 	void refresh(uint16_t param) override
 	{
 		// in case we don't have ownership, and it changed below, we have to refresh our cache.
-        {
-            const AtomicTransaction _transaction;
-            if (!contains(param)) {
-                _values[param] = _parent->get(param);
-            }
-        }
+		{
+			const AtomicTransaction _transaction;
+
+			if (!contains(param)) {
+				_values[param] = _parent->get(param);
+			}
+		}
 		_parent->refresh(param);
 	}
 

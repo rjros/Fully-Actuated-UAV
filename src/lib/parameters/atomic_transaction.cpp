@@ -34,5 +34,5 @@
 #include "atomic_transaction.h"
 
 #ifdef __PX4_POSIX
-_MutexHolder  AtomicTransaction::_mutex_holder = _MutexHolder{};
+_MutexHolder  AtomicTransaction::_mutex_holder = _MutexHolder {};
 #endif

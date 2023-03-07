@@ -52,12 +52,13 @@ public:
 		return param < PARAM_COUNT;
 	}
 
-    param_value_u get(uint16_t param) const override
+	param_value_u get(uint16_t param) const override
 	{
 		if (param >= PARAM_COUNT) {
 			return {0};
 		}
-        return px4::parameters[param].val;
+
+		return px4::parameters[param].val;
 	}
 
 	void reset(uint16_t param) override

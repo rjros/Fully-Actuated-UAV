@@ -42,7 +42,7 @@ class DynamicSparseLayer : public ParamLayer
 private:
 	struct Slot {
 		uint16_t param;
-        param_value_u value;
+		param_value_u value;
 	};
 
 	int _next_slot = 0;
@@ -53,12 +53,12 @@ private:
 
 	static int _slotCompare(const void *a, const void *b)
 	{
-		return ((Slot *)a)->param - ((Slot *)b)->param;
+		return ((int)((Slot *)a)->param) - ((int)((Slot *)b)->param);
 	}
 
 	void _sort()
 	{
-		qsort(_slots, _n_slots, sizeof(param_value_u), _slotCompare);
+		qsort(_slots, _n_slots, sizeof(Slot), _slotCompare);
 	}
 
 	int _getIndex(uint16_t param) const
@@ -159,11 +159,13 @@ public:
 		return _getIndex(param) < _next_slot;
 	}
 
-    param_value_u get(uint16_t param) const override
+	param_value_u get(uint16_t param) const override
 	{
 		const AtomicTransaction transaction;
+
 		if (contains(param)) {
 			return _slots[_getIndex(param)].value;
+
 		} else {
 			return _parent->get(param);
 		}
