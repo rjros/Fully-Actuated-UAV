@@ -119,10 +119,7 @@ static perf_counter_t param_find_perf;
 static perf_counter_t param_get_perf;
 static perf_counter_t param_set_perf;
 
-static px4_sem_t param_sem_save; ///< this protects against concurrent param saves (file or flash access).
-///< we use a separate lock to allow concurrent param reads and saves.
-///< a param_set could still be blocked by a param save, because it
-///< needs to take the reader lock
+static pthread_mutex_t file_mutex  = PTHREAD_MUTEX_INITIALIZER; ///< this protects against concurrent param saves (file or flash access).
 
 void
 param_init()
@@ -766,7 +763,10 @@ int param_save_default()
 	}
 
 	// take the file lock
-	do {} while (px4_sem_wait(&param_sem_save) != 0);
+    if (pthread_mutex_trylock(&file_mutex) != 0) {
+        PX4_ERR("param_save_default: file lock failed");
+        return PX4_ERROR;
+    }
 
 	int res = PX4_ERROR;
 	const char *filename = param_get_default_file();
@@ -834,7 +834,7 @@ int param_save_default()
 		}
 	}
 
-	px4_sem_post(&param_sem_save);
+    pthread_mutex_unlock(&file_mutex);
 
 	if (shutdown_lock_ret == 0) {
 		px4_shutdown_unlock();
@@ -995,30 +995,26 @@ param_export(const char *filename, param_filter_func filter)
 	}
 
 	// take the file lock
-	printf("TAKING FILE_LOCK\n");
-	do {} while (px4_sem_wait(&param_sem_save) != 0);
+	if (pthread_mutex_trylock(&file_mutex) != 0) {
+        PX4_ERR("param_export: file lock failed");
+        return PX4_ERROR;
+    }
 
-	printf("TAKING FILE_LOCK DONE\n");
-
-	printf("OPENING FILE\n");
 	int fd = ::open(filename, O_RDWR | O_CREAT, PX4_O_MODE_666);
 	int result = PX4_ERROR;
 
-	printf("OPENING FILE DONE\n");
 	perf_begin(param_export_perf);
 
 	if (fd > -1) {
-		printf("EXPORTING PARAMS INTERNAL\n");
 		result = param_export_internal(fd, filter);
 
 	} else {
-		printf("EXPORTING PARAMS FLASH\n");
 		result = flash_param_save(filter);
 	}
 
 	perf_end(param_export_perf);
 
-	px4_sem_post(&param_sem_save);
+    pthread_mutex_unlock(&file_mutex);
 
 	if (shutdown_lock_ret == 0) {
 		px4_shutdown_unlock();
