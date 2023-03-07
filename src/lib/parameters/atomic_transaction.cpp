@@ -32,53 +32,7 @@
  ****************************************************************************/
 
 #include "atomic_transaction.h"
-#include "px4_platform_common/micro_hal.h"
 
-#ifndef px4_enter_critical_section
-#define px4_enter_critical_section() 0
+#ifdef __PX4_POSIX
+_MutexHolder  AtomicTransaction::_mutex_holder = _MutexHolder{};
 #endif
-
-#ifndef px4_leave_critical_section
-#define px4_leave_critical_section(irq)
-#endif
-
-int g_atomic_depth = 0;
-int g_irq = 0;
-
-void atomic_take_count()
-{
-	if (g_atomic_depth > 0) {
-		// always disable interrupts
-		g_atomic_depth ++;
-		return;
-
-	} else {
-		// always disable interrupts
-		int irq = px4_enter_critical_section();
-
-		if (g_atomic_depth == 0) {
-			g_irq = irq;
-		}
-
-		g_atomic_depth++;
-	}
-}
-
-void atomic_release_count()
-{
-	if (g_atomic_depth > 0) {
-		g_atomic_depth--;
-
-		if (g_atomic_depth == 0) {
-			// release interrupts
-			px4_leave_critical_section(g_irq);
-		}
-	}
-}
-
-void atomic_release_all()
-{
-	while (g_atomic_depth > 0) {
-		atomic_release_count();
-	}
-}

@@ -34,10 +34,60 @@
 #ifndef PX4_ATOMIC_TRANSACTION_H
 #define PX4_ATOMIC_TRANSACTION_H
 
-void atomic_take_count();
+#ifdef __PX4_NUTTX
+#include "px4_platform_common/micro_hal.h"
+#endif
 
-void atomic_release_count();
+#ifdef __PX4_POSIX
+#include <pthread.h>
 
-void atomic_release_all();
+class _MutexHolder {
+public:
+    pthread_mutex_t _mutex;
+    pthread_mutexattr_t _mutex_attr;
+
+    _MutexHolder() {
+        pthread_mutexattr_init(&_mutex_attr);
+        pthread_mutexattr_settype(&_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&_mutex, &_mutex_attr);
+    }
+
+    ~_MutexHolder() {
+        pthread_mutex_destroy(&_mutex);
+    }
+};
+#endif
+
+
+class AtomicTransaction
+{
+private:
+#ifdef __PX4_NUTTX
+    irqstate_t _irq_state;
+#endif
+
+#ifdef __PX4_POSIX
+    static _MutexHolder _mutex_holder;
+#endif
+
+public:
+    AtomicTransaction() {
+#ifdef __PX4_NUTTX
+        _irq_state = px4_enter_critical_section();
+#endif
+#ifdef __PX4_POSIX
+        pthread_mutex_lock(&_mutex_holder._mutex);
+#endif
+    }
+
+    ~AtomicTransaction() {
+#ifdef __PX4_NUTTX
+        px4_leave_critical_section(_irq_state);
+#endif
+#ifdef __PX4_POSIX
+        pthread_mutex_unlock(&_mutex_holder._mutex);
+#endif
+    }
+};
 
 #endif //PX4_ATOMIC_TRANSACTION_H

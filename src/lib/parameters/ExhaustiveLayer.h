@@ -57,11 +57,11 @@ public:
 		if (param >= PARAM_COUNT) {
 			return false;
 		}
-
-		atomic_take_count();
-		_values[param] = value;
-		_ownership_set.set(param);
-		atomic_release_count();
+        {
+            const AtomicTransaction _transaction;
+            _values[param] = value;
+            _ownership_set.set(param);
+        }
 		return true;
 	}
 
@@ -87,22 +87,20 @@ public:
 			return;
 		}
 
-		atomic_take_count();
+		const AtomicTransaction _transaction;
 		_values[param] = _parent->get(param);
 		_ownership_set.set(param, false);
-		atomic_release_count();
 	}
 
 	void refresh(uint16_t param) override
 	{
 		// in case we don't have ownership, and it changed below, we have to refresh our cache.
-		atomic_take_count();
-
-		if (!contains(param)) {
-			_values[param] = _parent->get(param);
-		}
-
-		atomic_release_count();
+        {
+            const AtomicTransaction _transaction;
+            if (!contains(param)) {
+                _values[param] = _parent->get(param);
+            }
+        }
 		_parent->refresh(param);
 	}
 

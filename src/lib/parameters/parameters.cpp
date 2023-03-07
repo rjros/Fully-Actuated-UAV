@@ -378,11 +378,12 @@ autosave_worker(void *arg)
 		}
 	}
 
-	atomic_take_count();
-	last_autosave_timestamp = hrt_absolute_time();
-	autosave_scheduled.store(false);
-	disabled = autosave_disabled;
-	atomic_release_count();
+    {
+        const AtomicTransaction transaction;
+        last_autosave_timestamp = hrt_absolute_time();
+        autosave_scheduled.store(false);
+        disabled = autosave_disabled;
+    }
 
 	if (disabled) {
 		return;
@@ -429,7 +430,7 @@ param_autosave()
 void
 param_control_autosave(bool enable)
 {
-	atomic_take_count();
+	const AtomicTransaction transaction;
 
 	if (!enable && autosave_scheduled.load()) {
 		work_cancel(LPWORK, &autosave_work);
@@ -437,7 +438,6 @@ param_control_autosave(bool enable)
 	}
 
 	autosave_disabled = !enable;
-	atomic_release_count();
 }
 
 static int

@@ -132,7 +132,7 @@ public:
 
 	bool store(uint16_t param, ParamValueUnion value) override
 	{
-		atomic_take_count();
+		const AtomicTransaction transaction;
 
 		if (contains(param)) {
 			_slots[_getIndex(param)].value = value;
@@ -143,7 +143,6 @@ public:
 
 		} else {
 			if (!_grow()) {
-				atomic_release_count();
 				return false;
 			}
 
@@ -151,37 +150,28 @@ public:
 			_sort();
 		}
 
-		atomic_release_count();
 		return true;
 	}
 
 	bool contains(uint16_t param) const override
 	{
-		atomic_take_count();
-		bool found = _getIndex(param) < _next_slot;
-		atomic_release_count();
-		return found;
+		const AtomicTransaction transaction;
+		return _getIndex(param) < _next_slot;
 	}
 
 	ParamValueUnion get(uint16_t param) const override
 	{
-		atomic_take_count();
-		ParamValueUnion value;
-
+		const AtomicTransaction transaction;
 		if (contains(param)) {
-			value = _slots[_getIndex(param)].value;
-
+			return _slots[_getIndex(param)].value;
 		} else {
-			value = _parent->get(param);
+			return _parent->get(param);
 		}
-
-		atomic_release_count();
-		return value;
 	}
 
 	void reset(uint16_t param) override
 	{
-		atomic_take_count();
+		const AtomicTransaction transaction;
 		int index = _getIndex(param);
 
 		if (index < _next_slot) {
@@ -189,8 +179,6 @@ public:
 			_sort();
 			_next_slot--;
 		}
-
-		atomic_release_count();
 	}
 
 	void refresh(uint16_t param) override
