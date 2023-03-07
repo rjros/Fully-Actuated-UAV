@@ -76,6 +76,16 @@ private:
 public:
 	AtomicTransaction()
 	{
+		lock();
+	}
+
+	~AtomicTransaction()
+	{
+		unlock();
+	}
+
+	void lock()
+	{
 #ifdef __PX4_NUTTX
 		_irq_state = px4_enter_critical_section();
 #endif
@@ -84,7 +94,7 @@ public:
 #endif
 	}
 
-	~AtomicTransaction()
+	void unlock()
 	{
 #ifdef __PX4_NUTTX
 		px4_leave_critical_section(_irq_state);

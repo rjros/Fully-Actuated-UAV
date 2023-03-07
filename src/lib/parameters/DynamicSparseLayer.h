@@ -36,6 +36,7 @@
 
 #include "ParamLayer.h"
 
+#include <px4_platform_common/atomic.h>
 
 class DynamicSparseLayer : public ParamLayer
 {
@@ -48,7 +49,7 @@ private:
 	int _next_slot = 0;
 	int _n_slots = 0;
 	int _n_grow;
-	Slot *_slots = nullptr;
+	px4::atomic<Slot *> _slots{nullptr};
 
 
 	static int _slotCompare(const void *a, const void *b)
@@ -58,21 +59,22 @@ private:
 
 	void _sort()
 	{
-		qsort(_slots, _n_slots, sizeof(Slot), _slotCompare);
+		qsort(_slots.load(), _n_slots, sizeof(Slot), _slotCompare);
 	}
 
 	int _getIndex(uint16_t param) const
 	{
 		int left = 0;
 		int right = _next_slot - 1;
+		Slot *slots = _slots.load();
 
 		while (left <= right) {
 			int mid = (left + right) / 2;
 
-			if (_slots[mid].param == param) {
+			if (slots[mid].param == param) {
 				return mid;
 
-			} else if (_slots[mid].param < param) {
+			} else if (slots[mid].param < param) {
 				left = mid + 1;
 
 			} else {
@@ -83,70 +85,97 @@ private:
 		return _next_slot;
 	}
 
-	bool _grow()
+	bool _grow(AtomicTransaction &transaction)
 	{
 		if (_n_slots == 0) {
 			return false;
 		}
 
-		Slot *new_slots = (Slot *)realloc(_slots, sizeof(Slot) * (_n_slots + _n_grow));
+		int max_retries = 5;
 
-		if (new_slots == nullptr) {
-			return false;
+		// As malloc uses locking, so we need to re-enable IRQ's during malloc/free and
+		// then atomically exchange the buffer
+		while (_next_slot >= _n_slots && max_retries-- > 0) {
+			Slot *previous_slots = nullptr;
+			Slot *new_slots = nullptr;
+
+			do {
+				previous_slots = _slots.load();
+				transaction.unlock();
+
+				if (new_slots) {
+					free(new_slots);
+				}
+
+				new_slots = (Slot *) malloc(sizeof(Slot) * (_n_slots + _n_grow));
+				transaction.lock();
+
+				if (new_slots == nullptr) {
+					return false;
+				}
+
+			} while (!_slots.compare_exchange(&previous_slots, new_slots));
+
+			memcpy(new_slots, previous_slots, sizeof(Slot) * _n_slots);
+
+			for (int i = _n_slots; i < _n_slots + _n_grow; i++) {
+				new_slots[i] = {UINT16_MAX, param_value_u{}};
+			}
+
+			_n_slots += _n_grow;
+
+			transaction.unlock();
+			free(previous_slots);
+			transaction.lock();
 		}
 
-		_slots = new_slots;
-
-		for (int i = _n_slots; i < _n_slots + _n_grow; i++) {
-			_slots[i] = {UINT16_MAX, param_value_u{}};
-		}
-
-		_n_slots += _n_grow;
-		return true;
+		return _next_slot < _n_slots;
 	}
 
 public:
 	DynamicSparseLayer(ParamLayer &parent, int n_prealloc = 64, int n_grow = 4) : ParamLayer(parent),
 		_n_slots(n_prealloc), _n_grow(n_grow)
 	{
-		_slots = (Slot *)malloc(sizeof(Slot) * n_prealloc);
+		Slot *slots = (Slot *)malloc(sizeof(Slot) * n_prealloc);
 
-		if (_slots == nullptr) {
+		if (slots == nullptr) {
 			PX4_ERR("Failed to allocate memory for dynamic sparse layer");
 			_n_slots = 0;
 			return;
 		}
 
 		for (int i = 0; i < _n_slots; i++) {
-			_slots[i] = {UINT16_MAX, param_value_u{}};
+			slots[i] = {UINT16_MAX, param_value_u{}};
 		}
+
+		_slots.store(slots);
 	}
 
 	virtual ~DynamicSparseLayer()
 	{
-		if (_slots) {
-			free(_slots);
-			_slots = nullptr;
+		if (_slots.load()) {
+			free(_slots.load());
 		}
 	}
 
 	bool store(uint16_t param, param_value_u value) override
 	{
-		const AtomicTransaction transaction;
+		AtomicTransaction transaction;
+		Slot *slots = _slots.load();
 
 		if (contains(param)) {
-			_slots[_getIndex(param)].value = value;
+			slots[_getIndex(param)].value = value;
 
 		} else if (_next_slot < _n_slots) {
-			_slots[_next_slot++] = {param, value};
+			slots[_next_slot++] = {param, value};
 			_sort();
 
 		} else {
-			if (!_grow()) {
+			if (!_grow(transaction)) {
 				return false;
 			}
 
-			_slots[_next_slot++] = {param, value};
+			_slots.load()[_next_slot++] = {param, value};
 			_sort();
 		}
 
@@ -162,9 +191,10 @@ public:
 	param_value_u get(uint16_t param) const override
 	{
 		const AtomicTransaction transaction;
+		Slot *slots = _slots.load();
 
 		if (contains(param)) {
-			return _slots[_getIndex(param)].value;
+			return slots[_getIndex(param)].value;
 
 		} else {
 			return _parent->get(param);
@@ -175,9 +205,10 @@ public:
 	{
 		const AtomicTransaction transaction;
 		int index = _getIndex(param);
+		Slot *slots = _slots.load();
 
 		if (index < _next_slot) {
-			_slots[index] = {UINT16_MAX, param_value_u{}};
+			slots[index] = {UINT16_MAX, param_value_u{}};
 			_sort();
 			_next_slot--;
 		}
