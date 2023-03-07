@@ -42,7 +42,7 @@ public:
 
 	ConstLayer() = default;
 
-	bool store(uint16_t param, ParamValueUnion value) override
+	bool store(uint16_t param, param_value_u value) override
 	{
 		return false;
 	}
@@ -52,20 +52,12 @@ public:
 		return param < PARAM_COUNT;
 	}
 
-	ParamValueUnion get(uint16_t param) const override
+    param_value_u get(uint16_t param) const override
 	{
 		if (param >= PARAM_COUNT) {
 			return {0};
 		}
-
-		switch (paramType(param)) {
-		case ParamType::INT32:
-			return {.i = px4::parameters[param].val.i};
-		case ParamType::FLOAT:
-			return {.f = px4::parameters[param].val.f};
-		default:
-			return {0};
-		}
+        return px4::parameters[param].val;
 	}
 
 	void reset(uint16_t param) override

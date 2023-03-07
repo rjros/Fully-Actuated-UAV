@@ -14,7 +14,7 @@ class StaticSparseLayer : public ParamLayer
 private:
 	struct Slot {
 		uint16_t param;
-		ParamValueUnion value;
+        param_value_u value;
 	};
 
 	Slot _slots[N_SLOTS];
@@ -28,7 +28,7 @@ private:
 
 	void _sort()
 	{
-		qsort(_slots, N_SLOTS, sizeof(ParamValueUnion), &_slotCompare);
+		qsort(_slots, N_SLOTS, sizeof(param_value_u), &_slotCompare);
 	}
 
 	int _getIndex(uint16_t param) const
@@ -58,13 +58,13 @@ public:
 	StaticSparseLayer(ParamLayer &parent) : ParamLayer(parent)
 	{
 		for (int i = 0; i < N_SLOTS; i++) {
-			_slots[i] = {UINT16_MAX, ParamValueUnion{}};
+			_slots[i] = {UINT16_MAX, param_value_u{}};
 		}
 	}
 
 	virtual ~StaticSparseLayer() = default;
 
-	bool store(uint16_t param, ParamValueUnion value) override
+	bool store(uint16_t param, param_value_u value) override
 	{
 		const AtomicTransaction transaction;
 
@@ -88,7 +88,7 @@ public:
 		return _getIndex(param) < N_SLOTS;
 	}
 
-	ParamValueUnion get(uint16_t param) const override
+    param_value_u get(uint16_t param) const override
 	{
 		const AtomicTransaction transaction;
 		int index = _getIndex(param);
@@ -107,7 +107,7 @@ public:
 		int index = _getIndex(param);
 
 		if (index < N_SLOTS) {
-			_slots[index] = {UINT16_MAX, ParamValueUnion{}};
+			_slots[index] = {UINT16_MAX, param_value_u{}};
 			_sort();
 			_next_slot--;
 		}

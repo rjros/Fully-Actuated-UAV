@@ -40,7 +40,7 @@
 class ExhaustiveLayer : public ParamLayer
 {
 private:
-	ParamValueUnion _values[PARAM_COUNT];
+    param_value_u _values[PARAM_COUNT];
 	px4::AtomicBitset<PARAM_COUNT> _ownership_set;
 
 public:
@@ -52,7 +52,7 @@ public:
 		}
 	}
 
-	bool store(uint16_t param, ParamValueUnion value) override
+	bool store(uint16_t param, param_value_u value) override
 	{
 		if (param >= PARAM_COUNT) {
 			return false;
@@ -70,7 +70,7 @@ public:
 		return param < PARAM_COUNT && _ownership_set[param];
 	}
 
-	ParamValueUnion get(uint16_t param) const override
+    param_value_u get(uint16_t param) const override
 	{
 		if (param >= PARAM_COUNT) {
 			return {0};
@@ -111,7 +111,7 @@ public:
 
 	int byteSize() const override
 	{
-		return PARAM_COUNT * sizeof(ParamValueUnion);
+		return PARAM_COUNT * sizeof(param_value_u);
 	}
 };
 

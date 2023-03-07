@@ -42,7 +42,7 @@ class DynamicSparseLayer : public ParamLayer
 private:
 	struct Slot {
 		uint16_t param;
-		ParamValueUnion value;
+        param_value_u value;
 	};
 
 	int _next_slot = 0;
@@ -58,7 +58,7 @@ private:
 
 	void _sort()
 	{
-		qsort(_slots, _n_slots, sizeof(ParamValueUnion), _slotCompare);
+		qsort(_slots, _n_slots, sizeof(param_value_u), _slotCompare);
 	}
 
 	int _getIndex(uint16_t param) const
@@ -98,7 +98,7 @@ private:
 		_slots = new_slots;
 
 		for (int i = _n_slots; i < _n_slots + _n_grow; i++) {
-			_slots[i] = {UINT16_MAX, ParamValueUnion{}};
+			_slots[i] = {UINT16_MAX, param_value_u{}};
 		}
 
 		_n_slots += _n_grow;
@@ -118,7 +118,7 @@ public:
 		}
 
 		for (int i = 0; i < _n_slots; i++) {
-			_slots[i] = {UINT16_MAX, ParamValueUnion{}};
+			_slots[i] = {UINT16_MAX, param_value_u{}};
 		}
 	}
 
@@ -130,7 +130,7 @@ public:
 		}
 	}
 
-	bool store(uint16_t param, ParamValueUnion value) override
+	bool store(uint16_t param, param_value_u value) override
 	{
 		const AtomicTransaction transaction;
 
@@ -159,7 +159,7 @@ public:
 		return _getIndex(param) < _next_slot;
 	}
 
-	ParamValueUnion get(uint16_t param) const override
+    param_value_u get(uint16_t param) const override
 	{
 		const AtomicTransaction transaction;
 		if (contains(param)) {
@@ -175,7 +175,7 @@ public:
 		int index = _getIndex(param);
 
 		if (index < _next_slot) {
-			_slots[index] = {UINT16_MAX, ParamValueUnion{}};
+			_slots[index] = {UINT16_MAX, param_value_u{}};
 			_sort();
 			_next_slot--;
 		}

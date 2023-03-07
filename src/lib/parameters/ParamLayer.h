@@ -35,17 +35,7 @@
 #define PX4_PARAMLAYER_H
 
 #include "atomic_transaction.h"
-
-union ParamValueUnion {
-	float f;
-	int32_t i;
-};
-
-enum class ParamType {
-	UNKNOWN = 0,
-	INT32 = 1,
-	FLOAT = 2
-};
+#include "param.h"
 
 class ParamLayer
 {
@@ -55,25 +45,16 @@ public:
 protected:
 	ParamLayer *_parent;
 
-	static inline constexpr ParamType paramType(uint16_t param)
-	{
-		if (param < PARAM_COUNT) {
-			return (ParamType) px4::parameters_type[param];
-		}
-
-		return ParamType::UNKNOWN;
-	}
-
 public:
 	ParamLayer(ParamLayer &parent) : _parent(&parent) {}
 
 	ParamLayer() : _parent(nullptr) {}
 
-	virtual bool store(uint16_t param, ParamValueUnion value) = 0;
+	virtual bool store(uint16_t param, param_value_u value) = 0;
 
 	virtual bool contains(uint16_t param) const = 0;
 
-	virtual ParamValueUnion get(uint16_t param) const = 0;
+	virtual param_value_u get(uint16_t param) const = 0;
 
 	virtual void reset(uint16_t param) = 0;
 
