@@ -64,8 +64,6 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
-#include <uORB/topics/omni_attitude_status.h>
-
 
 using namespace time_literals;
 
@@ -73,8 +71,6 @@ class MulticopterPositionControl : public ModuleBase<MulticopterPositionControl>
 	public ModuleParams, public px4::ScheduledWorkItem
 {
 public:
-
-	vehicle_attitude_s att;
 	MulticopterPositionControl(bool vtol = false);
 	~MulticopterPositionControl() override;
 
@@ -100,10 +96,7 @@ private:
 	uORB::Publication<vehicle_attitude_setpoint_s>	     _vehicle_attitude_setpoint_pub {ORB_ID(vehicle_attitude_setpoint)};
 	uORB::Publication<vehicle_local_position_setpoint_s> _local_pos_sp_pub {ORB_ID(vehicle_local_position_setpoint)};	/**< vehicle local position setpoint publication */
 
-	uORB::Publication<omni_attitude_status_s>	_omni_attitude_status_pub{ORB_ID(omni_attitude_status)}; //omni status
-
 	uORB::SubscriptionCallbackWorkItem _local_pos_sub {this, ORB_ID(vehicle_local_position)};	/**< vehicle local position */
-
 
 	uORB::SubscriptionInterval _parameter_update_sub {ORB_ID(parameter_update), 1_s};
 
@@ -132,11 +125,6 @@ private:
 		.maybe_landed = true,
 		.landed = true,
 	};
-
-	float _param_tilt_angle = 0, _param_tilt_dir = 0; // Keeping the last parameter values in degrees
-	float _tilt_angle = 0, _tilt_dir = 0; // Keeping the currently used values in radians
-	float _param_roll_angle = 0, _param_pitch_angle = 0; // Keeping the last parameter values in degrees
-	float _tilt_roll = 0, _tilt_pitch = 0; // Keeping the currently used values in radians
 
 	DEFINE_PARAMETERS(
 		// Position Control
@@ -184,17 +172,7 @@ private:
 		(ParamFloat<px4::params::MPC_MAN_Y_TAU>)    _param_mpc_man_y_tau,
 
 		(ParamFloat<px4::params::MPC_XY_VEL_ALL>)   _param_mpc_xy_vel_all,
-		(ParamFloat<px4::params::MPC_Z_VEL_ALL>)    _param_mpc_z_vel_all,
-
-		// Omni-directional vehicle parameters
-		(ParamInt<px4::params::OMNI_ATT_MODE>) _param_omni_att_mode,
-		(ParamFloat<px4::params::OMNI_DFC_MAX_THR>) _param_omni_dfc_max_thr,
-		(ParamFloat<px4::params::OMNI_ATT_TLT_ANG>) _param_omni_att_tilt_angle,
-		(ParamFloat<px4::params::OMNI_ATT_TLT_DIR>) _param_omni_att_tilt_dir,
-		(ParamFloat<px4::params::OMNI_ATT_ROLL>) _param_omni_att_roll,
-		(ParamFloat<px4::params::OMNI_ATT_PITCH>) _param_omni_att_pitch,
-		(ParamInt<px4::params::OMNI_PROJ_AXES>) _param_omni_proj_axes,
-		(ParamFloat<px4::params::OMNI_ATT_RATE>) _param_omni_att_rate
+		(ParamFloat<px4::params::MPC_Z_VEL_ALL>)    _param_mpc_z_vel_all
 	);
 
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */

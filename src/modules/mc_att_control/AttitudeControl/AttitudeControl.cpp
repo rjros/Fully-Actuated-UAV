@@ -52,7 +52,7 @@ void AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_g
 	}
 }
 
-matrix::Vector3f AttitudeControl::update(const Quatf &q) const
+matrix::Vector3f AttitudeControl::update(const Quatf &q) constatt
 {
 	Quatf qd = _attitude_setpoint_q;
 
