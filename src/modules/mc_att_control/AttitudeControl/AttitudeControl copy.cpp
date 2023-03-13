@@ -54,10 +54,7 @@ void AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_g
 
 matrix::Vector3f AttitudeControl::update(const Quatf &q) const
 {
-
-	//inside the funcion parameters in the omnicopter function as matrix::Quatf qd
 	Quatf qd = _attitude_setpoint_q;
-	//Only normalize attitude setpoint once on update
 
 	// calculate reduced desired attitude neglecting vehicle's yaw to prioritize roll and pitch
 	const Vector3f e_z = q.dcm_z();

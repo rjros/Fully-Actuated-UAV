@@ -39,6 +39,7 @@
 #include <px4_platform_common/events.h>
 #include "PositionControl/ControlMath.hpp"
 
+
 using namespace matrix;
 
 MulticopterPositionControl::MulticopterPositionControl(bool vtol) :
@@ -520,7 +521,7 @@ void MulticopterPositionControl::Run()
 
 			// Publish attitude setpoint output
 			vehicle_attitude_setpoint_s attitude_setpoint{};
-			_control.getAttitudeSetpoint(attitude_setpoint);
+			// _control.getAttitudeSetpoint(attitude_setpoint);
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			omni_attitude_status_s omni_status{};
 			omni_status.timestamp = time_stamp_now;

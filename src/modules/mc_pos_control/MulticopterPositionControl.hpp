@@ -66,6 +66,11 @@
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/omni_attitude_status.h>
 
+#include <uORB/topics/vehicle_attitude.h>
+
+#include <uORB/topics/vehicle_status.h>
+
+
 
 using namespace time_literals;
 
