@@ -121,7 +121,6 @@ private:
 
 	orb_advert_t _mavlink_log_pub{nullptr};
 
-	manual_control_setpoint_s	_manual_control_sp{};
 	vehicle_control_mode_s		_v_control_mode{};
 	vehicle_status_s		_vehicle_status{};
 
@@ -135,7 +134,7 @@ private:
 
 	matrix::Vector3f _rates_sp;			/**< angular rates setpoint */
 
-	matrix::Vector3f _thrust_sp;		/**< 3D thrust setpoint*/
+	float		_thrust_sp{0.0f};		/**< thrust setpoint */
 
 	hrt_abstime _last_run{0};
 
