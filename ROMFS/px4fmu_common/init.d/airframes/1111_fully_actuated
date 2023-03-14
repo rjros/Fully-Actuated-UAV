@@ -6,6 +6,12 @@
 #
 # @type Tilt-Hexarotor
 # @class Copter
+# @output MAIN1 motor1
+# @output MAIN2 motor2
+# @output MAIN3 motor3
+# @output MAIN4 motor4
+# @output MAIN5 motor5
+# @output MAIN6 motor6
 #
 # @output AUX1 feed-through of RC AUX1 channel
 # @output AUX2 feed-through of RC AUX2 channel
@@ -39,12 +45,12 @@ then
 
 	param set SDLOG_PROFILE 179
 
-	param set OMNI_ATT_MODE 5
+	param set OMNI_ATT_MODE 2
 	param set OMNI_DFC_MAX_THR 0.20
 fi
 
 set MAV_TYPE 13
-
 # Set mixer
 set MIXER fully_actuated
-
+# Need to set all 8 channels
+set PWM_OUT 12345678

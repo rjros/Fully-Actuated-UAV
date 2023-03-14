@@ -177,6 +177,7 @@ set(models
 	typhoon_h480_ctrlalloc
 	uuv_bluerov2_heavy
 	uuv_hippocampus
+	omnicopter # added additional model for simulation
 	fully_actuated #added additional model for simulation
 )
 

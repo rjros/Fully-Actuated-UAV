@@ -51,6 +51,7 @@ px4_add_romfs_files(
 	firefly6.aux.mix
 	firefly6.main.mix
 	fw_generic_wing.main.mix
+	fully_actuated.main.mix
 	generic_diff_rover.main.mix
 	hexa_cox.main.mix
 	hexa_+.main.mix

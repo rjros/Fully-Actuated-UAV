@@ -14,7 +14,7 @@
 # @maintainer Azarakhsh Keipour <keipour@cmu.edu>
 #
 
-sh /etc/init.d/rc.mc_defaults
+. ${R}etc/init.d/rc.mc_defaults
 
 if [ $AUTOCNF = yes ]
 then
