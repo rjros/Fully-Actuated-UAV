@@ -60,6 +60,9 @@
 #include <uORB/topics/rc_parameter_map.h>
 #include <uORB/topics/parameter_update.h>
 #include <hysteresis/hysteresis.h>
+//Add the omnivehicle parameters for rc switching
+#include <uORB/topics/omni_attitude_status.h>
+
 
 using namespace time_literals;
 
@@ -168,6 +171,9 @@ private:
 	uORB::Subscription _actuator_controls_3_sub{ORB_ID(actuator_controls_3)};
 
 	uORB::Publication<rc_channels_s> _rc_channels_pub{ORB_ID(rc_channels)};
+
+	// uORB::Publication<omni_attitude_status_s>	_omni_attitude_status_pub{ORB_ID(omni_attitude_status)}; //omni status
+
 	uORB::PublicationMulti<manual_control_setpoint_s> _manual_control_input_pub{ORB_ID(manual_control_input)};
 	uORB::Publication<manual_control_switches_s> _manual_control_switches_pub{ORB_ID(manual_control_switches)};
 	uORB::Publication<actuator_controls_s> _actuator_group_3_pub{ORB_ID(actuator_controls_3)};
@@ -235,8 +241,13 @@ private:
 		(ParamFloat<px4::params::RC_KILLSWITCH_TH>) _param_rc_killswitch_th,
 		(ParamFloat<px4::params::RC_ARMSWITCH_TH>) _param_rc_armswitch_th,
 		(ParamFloat<px4::params::RC_TRANS_TH>) _param_rc_trans_th,
+
 		(ParamFloat<px4::params::RC_GEAR_TH>) _param_rc_gear_th,
 		(ParamFloat<px4::params::RC_RETURN_TH>) _param_rc_return_th,
+
+		//Omnidirectional parameters
+		(ParamInt<px4::params::RC_OMNI_MODE_SW>) _param_rc_omni_mode_sw,
+		(ParamFloat<px4::params::RC_OMNI_TH>) _param_rc_omni_th,
 
 		(ParamInt<px4::params::RC_CHAN_CNT>) _param_rc_chan_cnt
 	)

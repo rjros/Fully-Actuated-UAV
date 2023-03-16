@@ -56,7 +56,8 @@ static bool operator ==(const manual_control_switches_s &a, const manual_control
 		a.transition_switch == b.transition_switch &&
 		a.gear_switch == b.gear_switch &&
 		a.photo_switch == b.photo_switch &&
-		a.video_switch == b.video_switch);
+		a.video_switch == b.video_switch&&
+		a.omni_switch == b.omni_switch ) ; //omni switch parameter
 }
 
 static bool operator !=(const manual_control_switches_s &a, const manual_control_switches_s &b) { return !(a == b); }
@@ -217,6 +218,9 @@ void RCUpdate::update_rc_functions()
 	_rc.function[rc_channels_s::FUNCTION_ARMSWITCH] = _param_rc_map_arm_sw.get() - 1;
 	_rc.function[rc_channels_s::FUNCTION_TRANSITION] = _param_rc_map_trans_sw.get() - 1;
 	_rc.function[rc_channels_s::FUNCTION_GEAR] = _param_rc_map_gear_sw.get() - 1;
+	//omni mode parameters
+	_rc.function[rc_channels_s::FUNCTION_OMNI_MODE] = _param_rc_omni_mode_sw.get() -1;
+
 
 	_rc.function[rc_channels_s::FUNCTION_FLAPS] = _param_rc_map_flaps.get() - 1;
 
@@ -643,6 +647,8 @@ void RCUpdate::UpdateManualSwitches(const hrt_abstime &timestamp_sample)
 	switches.arm_switch        = get_rc_sw2pos_position(rc_channels_s::FUNCTION_ARMSWITCH,  _param_rc_armswitch_th.get());
 	switches.transition_switch = get_rc_sw2pos_position(rc_channels_s::FUNCTION_TRANSITION, _param_rc_trans_th.get());
 	switches.gear_switch       = get_rc_sw2pos_position(rc_channels_s::FUNCTION_GEAR,       _param_rc_gear_th.get());
+	switches.omni_switch       = get_rc_sw2pos_position(rc_channels_s::FUNCTION_OMNI_MODE, _param_rc_omni_th.get());
+
 
 #if defined(ATL_MANTIS_RC_INPUT_HACKS)
 	switches.photo_switch = get_rc_sw2pos_position(rc_channels_s::FUNCTION_AUX_3, 0.5f);
