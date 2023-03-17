@@ -175,10 +175,12 @@ set(models
 	tiltrotor
 	typhoon_h480
 	typhoon_h480_ctrlalloc
+	typhoon_h480_edf
 	uuv_bluerov2_heavy
 	uuv_hippocampus
 	omnicopter # added additional model for simulation
 	fully_actuated #added additional model for simulation
+	#edf test platform
 )
 
 set(worlds
