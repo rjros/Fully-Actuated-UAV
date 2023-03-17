@@ -539,7 +539,7 @@ void MulticopterPositionControl::Run()
 			int32_t value = _param_omni_mode_sw.get();
 
 			param_set(param,&value);
-
+			//check value
 			omni_status.att_mode = _param_omni_att_mode.get();
 
 
