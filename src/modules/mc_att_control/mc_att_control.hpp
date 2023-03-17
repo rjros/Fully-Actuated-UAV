@@ -155,8 +155,7 @@ private:
 		(ParamFloat<px4::params::MPC_MAN_TILT_MAX>) _param_mpc_man_tilt_max,			/**< maximum tilt allowed for manual flight */
 		(ParamFloat<px4::params::MPC_MANTHR_MIN>) _param_mpc_manthr_min,			/**< minimum throttle for stabilized */
 		(ParamFloat<px4::params::MPC_THR_MAX>) _param_mpc_thr_max,				/**< maximum throttle for stabilized */
-		(ParamFloat<px4::params::MPC_THR_HOVER>)
-		_param_mpc_thr_hover,			/**< throttle at which vehicle is at hover equilibrium */
+		(ParamFloat<px4::params::MPC_THR_HOVER>) _param_mpc_thr_hover,			/**< throttle at which vehicle is at hover equilibrium */
 		(ParamInt<px4::params::MPC_THR_CURVE>) _param_mpc_thr_curve,				/**< throttle curve behavior */
 
 		(ParamInt<px4::params::MC_AIRMODE>) _param_mc_airmode,
