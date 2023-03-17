@@ -1414,7 +1414,7 @@ PARAM_DEFINE_INT32(RC_MAP_LOITER_SW, 0);
 PARAM_DEFINE_INT32(RC_MAP_OFFB_SW, 0);
 
 /**
- * Emergency Kill switch channel
+ * Emergency Kill Switch channel
  *
  * @min 0
  * @max 18
@@ -1442,7 +1442,7 @@ PARAM_DEFINE_INT32(RC_MAP_OFFB_SW, 0);
 PARAM_DEFINE_INT32(RC_MAP_KILL_SW, 0);
 
 /**
- * Arm Switch channel.
+ * Arm switch channel.
  *
  * Use it to arm/disarm via switch instead of default throttle stick. If this is
  * assigned, arming and disarming via stick is disabled.
@@ -1476,6 +1476,7 @@ PARAM_DEFINE_INT32(RC_MAP_ARM_SW, 0);
  * Omni Switch Channel
  *
  * Use it to change attitude mode via switch.
+ *
  * @min 0
  * @max 18
  * @group Radio Switches

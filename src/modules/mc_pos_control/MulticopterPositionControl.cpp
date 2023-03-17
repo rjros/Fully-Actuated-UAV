@@ -525,11 +525,23 @@ void MulticopterPositionControl::Run()
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			omni_attitude_status_s omni_status{};
 			omni_status.timestamp = time_stamp_now;
+			// _control.getAttitudeSetpoint(matrix::Quatf(att.q), _param_omni_att_mode.get(), _param_omni_dfc_max_thr.get(),
+			// 			     _tilt_angle, _tilt_dir, _tilt_roll, _tilt_pitch, _param_omni_att_rate.get(), _param_omni_proj_axes.get(),
+			// 			     attitude_setpoint, omni_status);
+
 			_control.getAttitudeSetpoint(matrix::Quatf(att.q), _param_omni_att_mode.get(), _param_omni_dfc_max_thr.get(),
 						     _tilt_angle, _tilt_dir, _tilt_roll, _tilt_pitch, _param_omni_att_rate.get(), _param_omni_proj_axes.get(),
 						     attitude_setpoint, omni_status);
 
+			// omni_status.att_mode = _param_omni_att_mode.get();
+			//Get omni mode from rc
+			param_t param = param_handle(px4::params::OMNI_ATT_MODE);
+			int32_t value = _param_omni_mode_sw.get();
+
+			param_set(param,&value);
+
 			omni_status.att_mode = _param_omni_att_mode.get();
+
 
 			_omni_attitude_status_pub.publish(omni_status);
 

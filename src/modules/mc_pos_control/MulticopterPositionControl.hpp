@@ -199,7 +199,9 @@ private:
 		(ParamFloat<px4::params::OMNI_ATT_ROLL>) _param_omni_att_roll,
 		(ParamFloat<px4::params::OMNI_ATT_PITCH>) _param_omni_att_pitch,
 		(ParamInt<px4::params::OMNI_PROJ_AXES>) _param_omni_proj_axes,
-		(ParamFloat<px4::params::OMNI_ATT_RATE>) _param_omni_att_rate
+		(ParamFloat<px4::params::OMNI_ATT_RATE>) _param_omni_att_rate,
+		//Control mode with RC
+		(ParamInt<px4::params::RC_OMNI_MODE_SW>) _param_omni_mode_sw
 	);
 
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
