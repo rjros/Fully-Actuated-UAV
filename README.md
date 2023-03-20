@@ -3,6 +3,7 @@
 Modified version of the release version of the PX4-Autopilot firmware, using the existing control allocation method.
 
 * Modify the controllers in the system to allow for flight with no tilt.
+* Consider semi-actuated systems (have limited control on some axes and can produce 3D forces in others)
 * Include the simulation documents for gazebo for the frames
 * Tested in the pixhawk 6C
 
