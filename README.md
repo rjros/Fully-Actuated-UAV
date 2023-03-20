@@ -1,4 +1,4 @@
-# PX4 Autopilot modified for fully actuated system {Work in Progress}
+# PX4 Autopilot modified for fully actuated system (Work in Progress)
 
 Modified version of the release version of the PX4-Autopilot firmware, using the existing control allocation method.
 
