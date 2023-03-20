@@ -69,6 +69,9 @@
 #include <uORB/topics/vehicle_attitude.h>
 
 #include <uORB/topics/vehicle_status.h>
+//read values from switches
+#include <uORB/topics/manual_control_switches.h>
+
 
 
 
@@ -117,6 +120,11 @@ private:
 	uORB::Subscription _vehicle_constraints_sub {ORB_ID(vehicle_constraints)};
 	uORB::Subscription _vehicle_control_mode_sub {ORB_ID(vehicle_control_mode)};
 	uORB::Subscription _vehicle_land_detected_sub {ORB_ID(vehicle_land_detected)};
+	//read values from the att mode
+	uORB::Subscription manual_control_switches_sub{ORB_ID(manual_control_switches)};
+
+	// manual_control_switches_sub switches{};
+
 
 	hrt_abstime	_time_stamp_last_loop{0};		/**< time stamp of last loop iteration */
 

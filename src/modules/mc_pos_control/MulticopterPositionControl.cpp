@@ -536,12 +536,14 @@ void MulticopterPositionControl::Run()
 			// omni_status.att_mode = _param_omni_att_mode.get();
 			//Get omni mode from rc
 			param_t param = param_handle(px4::params::OMNI_ATT_MODE);
-			int32_t value = _param_omni_mode_sw.get();
 
-			param_set(param,&value);
 			//check value
-			omni_status.att_mode = _param_omni_att_mode.get();
+			manual_control_switches_s switches{};
 
+			manual_control_switches_sub.update(&switches);
+			int32_t value= switches.omni_switch;
+			param_set(param,&value);
+			omni_status.att_mode=_param_omni_att_mode.get();
 
 			_omni_attitude_status_pub.publish(omni_status);
 
