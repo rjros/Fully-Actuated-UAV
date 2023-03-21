@@ -122,6 +122,7 @@ private:
 	uORB::Subscription _vehicle_land_detected_sub {ORB_ID(vehicle_land_detected)};
 	//read values from the att mode
 	uORB::Subscription manual_control_switches_sub{ORB_ID(manual_control_switches)};
+	manual_control_switches_s switches{};
 
 	// manual_control_switches_sub switches{};
 

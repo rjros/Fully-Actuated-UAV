@@ -57,11 +57,11 @@ namespace ControlMath
 		switch (omni_att_mode)
 		{
 		case 2:
-			thrustToZeroTiltAttitude(thr_sp, yaw_sp, att, omni_proj_axes, att_sp);
-			break;
-		default:
 			bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
 			att_sp.thrust_body[2] = -thr_sp.length();
+			break;
+		default:
+			thrustToZeroTiltAttitude(thr_sp, yaw_sp, att, omni_proj_axes, att_sp);
 		}
 
 		// Estimate the optimal tilt angle and direction to counteract the wind

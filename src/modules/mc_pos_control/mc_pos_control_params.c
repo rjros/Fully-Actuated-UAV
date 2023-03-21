@@ -892,10 +892,10 @@ PARAM_DEFINE_FLOAT(OMNI_DFC_MAX_THR, 0.15f);
  * to counteract with the external force (e.g., wind).
  *
  * @min 0
- * @max 2
- * @value 0 tilted attitude
- * @value 1 min-tilt attitude
- * @value 2 constant zero tilt
+ * @max 3
+ * @value 2 tilted attitude
+ * @value 1 constant zero tilt
+ * @value 3 min-tilt attitude
  */
 PARAM_DEFINE_INT32(OMNI_ATT_MODE, 0);
 
