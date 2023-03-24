@@ -533,16 +533,20 @@ void MulticopterPositionControl::Run()
 						     _tilt_angle, _tilt_dir, _tilt_roll, _tilt_pitch, _param_omni_att_rate.get(), _param_omni_proj_axes.get(),
 						     attitude_setpoint, omni_status);
 
-			// omni_status.att_mode = _param_omni_att_mode.get();
+			///////////////////////////////////////////////////////////
+			//Add condition for selecting between rc or saved condition
 			//Get omni mode from rc
-			param_t param = param_handle(px4::params::OMNI_ATT_MODE);
+			// param_t param = param_handle(px4::params::OMNI_ATT_MODE);
+			// manual_control_switches_sub.update(&switches);
+			// int32_t value= switches.omni_switch;
+			// param_set(param,&value);
+			///////////////////////////////////////////////////////////
+			//Add condition for selecting between rc or saved condition
+			omni_status.att_mode = _param_omni_att_mode.get();
+			// omni_status.att_mode=switches.omni_switch;
 
-			manual_control_switches_sub.update(&switches);
-			int32_t value= switches.omni_switch;
-			param_set(param,&value);
 
-			omni_status.att_mode=switches.omni_switch;
-			param_set(param,&value);
+
 
 			_omni_attitude_status_pub.publish(omni_status);
 

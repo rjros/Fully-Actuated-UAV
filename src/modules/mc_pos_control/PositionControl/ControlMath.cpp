@@ -60,7 +60,7 @@ namespace ControlMath
 			bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
 			att_sp.thrust_body[2] = -thr_sp.length();
 			break;
-		default:
+		default: //Altitude is calculated from the desired thrust direction
 			thrustToZeroTiltAttitude(thr_sp, yaw_sp, att, omni_proj_axes, att_sp);
 		}
 
@@ -129,6 +129,16 @@ namespace ControlMath
 		att_sp.pitch_body = 0;
 		att_sp.yaw_body = yaw_sp;
 
+		//If used it breaks
+		// if (omni_proj_axes==1){// if thrust is projected on the current attitude
+		// 	matrix::Dcmf R_body=att;
+
+		// 	for (int i=0; i<3; i++) {
+		// 		body_x(i)=R_body(i,0);
+		// 		body_y(i)=R_body(i,1);
+		// 		body_z(i)=R_body(i,2);
+		// 	}
+		// }
 
 		att_sp.thrust_body[0] = thr_sp.dot(body_x);
 		att_sp.thrust_body[1] = thr_sp.dot(body_y);
