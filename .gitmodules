@@ -63,3 +63,6 @@
 [submodule "src/modules/microdds_client/Micro-XRCE-DDS-Client"]
 	path = src/modules/microdds_client/Micro-XRCE-DDS-Client
 	url = https://github.com/eProsima/Micro-XRCE-DDS-Client.git
+[submodule "Tools/sitl_gazebo"]
+	path = Tools/sitl_gazebo
+	url = https://github.com/rjros/PX4-SITL_Fully_actuated_gazebo-classic.git
