@@ -82,5 +82,6 @@ px4_add_romfs_files(
 	6012_typhoon_h480_ctrlalloc
 	6012_typhoon_h480_ctrlalloc.post
 	6013_typhoon_h480_simple
+	6014_typhoon_h480_dual
 	6060_typhoon_h480_new
 )

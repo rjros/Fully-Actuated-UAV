@@ -157,7 +157,7 @@ public:
 	 * @param dt time in seconds since last iteration
 	 * @return true if update succeeded and output setpoint is executable, false if not
 	 */
-	bool update(const float dt);
+	bool update(const float dt,const int omni_att_mode);
 
 	/**
 	 * Set the integral term in xy to 0.
@@ -207,8 +207,9 @@ private:
 	bool _inputValid();
 
 	void _positionControl(); ///< Position proportional control
-	void _velocityControl(const float dt); ///< Velocity PID control
+	void _velocityControl(const float dt, const int omni_att_mode); ///< Velocity PID control
 	void _accelerationControl(); ///< Acceleration setpoint processing
+	void _omni_accelerationControl();// separates thrust values if omni condition is on
 
 	// Gains
 	matrix::Vector3f _gain_pos_p; ///< Position control proportional gain

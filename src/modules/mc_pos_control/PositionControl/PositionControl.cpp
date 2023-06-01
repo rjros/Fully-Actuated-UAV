@@ -104,16 +104,16 @@ void PositionControl::setInputSetpoint(const vehicle_local_position_setpoint_s &
 	_yawspeed_sp = setpoint.yawspeed;
 }
 
-bool PositionControl::update(const float dt)
+bool PositionControl::update(const float dt,const int omni_att_mode)
 {
 	bool valid = _inputValid();
 
 	if (valid) {
 		_positionControl();
-		_velocityControl(dt);
+		_velocityControl(dt, omni_att_mode);
 
-		_yawspeed_sp = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
-		_yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw; // TODO: better way to disable yaw control
+				 _yawspeed_sp = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
+				 _yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw; // TODO: better way to disable yaw control
 	}
 
 	// There has to be a valid output accleration and thrust setpoint otherwise something went wrong
@@ -139,46 +139,209 @@ void PositionControl::_positionControl()
 	_vel_sp(2) = math::constrain(_vel_sp(2), -_lim_vel_up, _lim_vel_down);
 }
 
-void PositionControl::_velocityControl(const float dt)
+// void PositionControl::_velocityControl(const float dt, const int omni_att_mode)
+// {
+
+
+// 	// PID velocity control
+// 	Vector3f vel_error = _vel_sp - _vel;
+// 	Vector3f acc_sp_velocity = vel_error.emult(_gain_vel_p) + _vel_int - _vel_dot.emult(_gain_vel_d);
+
+// 	// No control input from setpoints or corresponding states which are NAN
+// 	ControlMath::addIfNotNanVector3f(_acc_sp, acc_sp_velocity);
+
+
+// 	//if omni mode dont separate the thrust sp.
+// 	// Print an error if the omni_att_mode parameter is out of range
+// 	if (omni_att_mode > 6 || omni_att_mode < 0) {
+// 		PX4_ERR("OMNI_ATT_MODE parameter set to unknown value!");
+// 	}
+
+// 	//check value for the switch
+// 	switch (omni_att_mode) {
+// 	case 3:	{
+// 		//bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
+// 		//att_sp.thrust_body[2] = -thr_sp.length();
+
+// 		// Determine how much vertical thrust is left keeping horizontal margin
+// 		_accelerationControl();
+
+// 		// Integrator anti-windup in vertical direction
+// 		if ((_thr_sp(2) >= -_lim_thr_min && vel_error(2) >= 0.0f) ||
+// 		(_thr_sp(2) <= -_lim_thr_max && vel_error(2) <= 0.0f)) {
+// 		vel_error(2) = 0.f;
+// 		}
+
+// 		// Estimate the optimal tilt angle and direction to counteract the wind
+// 		// Prioritize vertical control while keeping a horizontal margin
+// 		//Mode dependant with additional actuators is not needed
+// 		const Vector2f thrust_sp_xy(_thr_sp);
+// 		const float thrust_sp_xy_norm = thrust_sp_xy.norm();
+// 		const float thrust_max_squared = math::sq(_lim_thr_max);
+
+
+// 		const float allocated_horizontal_thrust = math::min(thrust_sp_xy_norm, _lim_thr_xy_margin);
+// 		const float thrust_z_max_squared = thrust_max_squared - math::sq(allocated_horizontal_thrust);
+
+// 		// Saturate maximal vertical thrust
+// 		_thr_sp(2) = math::max(_thr_sp(2), -sqrtf(thrust_z_max_squared));
+
+// 		// Determine how much horizontal thrust is left after prioritizing vertical control
+// 		const float thrust_max_xy_squared = thrust_max_squared - math::sq(_thr_sp(2));
+// 		float thrust_max_xy = 0;
+
+// 		if (thrust_max_xy_squared > 0) {
+// 			thrust_max_xy = sqrtf(thrust_max_xy_squared);
+// 		}
+
+// 		// Saturate thrust in horizontal direction
+// 		if (thrust_sp_xy_norm > thrust_max_xy) {
+// 			_thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+// 		}
+// 		// _thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+
+// 		}break;
+// 	default:
+// 		// Saturate maximal vertical thrust
+// 		_omni_accelerationControl();
+
+// 		// Integrator anti-windup in vertical direction
+// 		if ((_thr_sp(2) >= -_lim_thr_min && vel_error(2) >= 0.0f) ||
+// 		(_thr_sp(2) <= -_lim_thr_max && vel_error(2) <= 0.0f)) {
+// 		vel_error(2) = 0.f;
+// 		}
+
+// 		// Estimate the optimal tilt angle and direction to counteract the wind
+// 		// Prioritize vertical control while keeping a horizontal margin
+// 		//Mode dependant with additional actuators is not needed
+// 		const Vector2f thrust_sp_xy(_thr_sp);
+// 		const float thrust_sp_xy_norm = thrust_sp_xy.norm();
+// 		const float thrust_max_squared = math::sq(_lim_thr_max);
+
+// 		const float omni_thrust_max_squared_xy = math::sq(_lim_thr_max);
+// 		float omni_thrust_max_xy = 0.0;
+
+// 		_thr_sp(2) = math::max(_thr_sp(2), -sqrtf(thrust_max_squared));
+// 		omni_thrust_max_xy = sqrtf(omni_thrust_max_squared_xy);
+// 		if (thrust_sp_xy_norm > omni_thrust_max_squared_xy) {
+// 			_thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * omni_thrust_max_xy;}
+
+// 	}
+
+// 	// Use tracking Anti-Windup for horizontal direction: during saturation, the integrator is used to unsaturate the output
+// 	// see Anti-Reset Windup for PID controllers, L.Rundqwist, 1990
+// 	const Vector2f acc_sp_xy_limited = Vector2f(_thr_sp) * (CONSTANTS_ONE_G / _hover_thrust);
+// 	const float arw_gain = 2.f / _gain_vel_p(0);
+// 	vel_error.xy() = Vector2f(vel_error) - (arw_gain * (Vector2f(_acc_sp) - acc_sp_xy_limited));
+
+// 	// Make sure integral doesn't get NAN
+// 	ControlMath::setZeroIfNanVector3f(vel_error);
+// 	// Update integral part of velocity control
+// 	_vel_int += vel_error.emult(_gain_vel_i) * dt;
+
+// 	// limit thrust integral
+// 	_vel_int(2) = math::min(fabsf(_vel_int(2)), CONSTANTS_ONE_G) * sign(_vel_int(2));
+// }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void PositionControl::_velocityControl(const float dt, const int omni_att_mode)
 {
+
+
 	// PID velocity control
 	Vector3f vel_error = _vel_sp - _vel;
 	Vector3f acc_sp_velocity = vel_error.emult(_gain_vel_p) + _vel_int - _vel_dot.emult(_gain_vel_d);
 
 	// No control input from setpoints or corresponding states which are NAN
 	ControlMath::addIfNotNanVector3f(_acc_sp, acc_sp_velocity);
+	//att_sp.thrust_body[2] = -thr_sp.length();
 
+	// Determine how much vertical thrust is left keeping horizontal margin
 	_accelerationControl();
 
 	// Integrator anti-windup in vertical direction
 	if ((_thr_sp(2) >= -_lim_thr_min && vel_error(2) >= 0.0f) ||
-	    (_thr_sp(2) <= -_lim_thr_max && vel_error(2) <= 0.0f)) {
-		vel_error(2) = 0.f;
+	(_thr_sp(2) <= -_lim_thr_max && vel_error(2) <= 0.0f)) {
+	vel_error(2) = 0.f;
 	}
 
+	// Estimate the optimal tilt angle and direction to counteract the wind
 	// Prioritize vertical control while keeping a horizontal margin
-	const Vector2f thrust_sp_xy(_thr_sp);
-	const float thrust_sp_xy_norm = thrust_sp_xy.norm();
+	//Mode dependant with additional actuators is not needed
+	Vector2f thrust_sp_xy(_thr_sp);
+	float thrust_sp_xy_norm = thrust_sp_xy.norm();
 	const float thrust_max_squared = math::sq(_lim_thr_max);
 
-	// Determine how much vertical thrust is left keeping horizontal margin
-	const float allocated_horizontal_thrust = math::min(thrust_sp_xy_norm, _lim_thr_xy_margin);
-	const float thrust_z_max_squared = thrust_max_squared - math::sq(allocated_horizontal_thrust);
 
-	// Saturate maximal vertical thrust
-	_thr_sp(2) = math::max(_thr_sp(2), -sqrtf(thrust_z_max_squared));
-
-	// Determine how much horizontal thrust is left after prioritizing vertical control
-	const float thrust_max_xy_squared = thrust_max_squared - math::sq(_thr_sp(2));
-	float thrust_max_xy = 0;
-
-	if (thrust_max_xy_squared > 0) {
-		thrust_max_xy = sqrtf(thrust_max_xy_squared);
+	//if omni mode dont separate the thrust sp.
+	// Print an error if the omni_att_mode parameter is out of range
+	if (omni_att_mode > 6 || omni_att_mode < 0) {
+		PX4_ERR("OMNI_ATT_MODE parameter set to unknown value!");
 	}
 
-	// Saturate thrust in horizontal direction
-	if (thrust_sp_xy_norm > thrust_max_xy) {
-		_thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+	//check value for the switch
+	switch (omni_att_mode) {
+	case 3:	{
+		//bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
+
+		const float allocated_horizontal_thrust = math::min(thrust_sp_xy_norm, _lim_thr_xy_margin);
+		const float thrust_z_max_squared = thrust_max_squared - math::sq(allocated_horizontal_thrust);
+
+		// Saturate maximal vertical thrust
+		_thr_sp(2) = math::max(_thr_sp(2), -sqrtf(thrust_z_max_squared));
+
+		// Determine how much horizontal thrust is left after prioritizing vertical control
+		const float thrust_max_xy_squared = thrust_max_squared - math::sq(_thr_sp(2));
+		float thrust_max_xy = 0;
+
+		if (thrust_max_xy_squared > 0) {
+			thrust_max_xy = sqrtf(thrust_max_xy_squared);
+		}
+
+		// Saturate thrust in horizontal direction
+		if (thrust_sp_xy_norm > thrust_max_xy) {
+			_thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+		}
+		// _thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+
+		}break;
+	default:
+
+		//increase value
+		thrust_sp_xy=thrust_sp_xy*5;
+		thrust_sp_xy_norm = thrust_sp_xy.norm();
+
+		//const float margin(70);
+		//const float allocated_horizontal_thrust = math::min(thrust_sp_xy_norm, margin);
+		const float thrust_z_max_squared = thrust_max_squared;// - math::sq(allocated_horizontal_thrust);
+
+		// Saturate maximal vertical thrust
+		_thr_sp(2) = math::max(_thr_sp(2), -sqrtf(thrust_z_max_squared));
+
+		// Determine how much horizontal thrust is left after prioritizing vertical control
+		const float thrust_max_xy_squared = thrust_max_squared ;//- math::sq(_thr_sp(2));
+		float thrust_max_xy = 0;
+
+		if (thrust_max_xy_squared > 0) {
+			thrust_max_xy = sqrtf(thrust_max_xy_squared);
+		}
+
+		// Saturate thrust in horizontal direction
+		if (thrust_sp_xy_norm > thrust_max_xy) {
+			_thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+		}
+		// _thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * thrust_max_xy;
+
+		// //Mode dependant with additional actuators is not needed
+		// const float omni_thrust_max_squared_xy = math::sq(_lim_thr_max);
+		// float omni_thrust_max_xy = 0.0;
+
+		// _thr_sp(2) = math::max(_thr_sp(2), -sqrtf(thrust_max_squared));
+		// omni_thrust_max_xy = sqrtf(omni_thrust_max_squared_xy);
+
+		// if (thrust_sp_xy_norm > omni_thrust_max_squared_xy) {
+		// 	_thr_sp.xy() = thrust_sp_xy / thrust_sp_xy_norm * omni_thrust_max_xy;}
+
 	}
 
 	// Use tracking Anti-Windup for horizontal direction: during saturation, the integrator is used to unsaturate the output
@@ -196,6 +359,12 @@ void PositionControl::_velocityControl(const float dt)
 	_vel_int(2) = math::min(fabsf(_vel_int(2)), CONSTANTS_ONE_G) * sign(_vel_int(2));
 }
 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 void PositionControl::_accelerationControl()
 {
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
@@ -207,7 +376,32 @@ void PositionControl::_accelerationControl()
 	collective_thrust /= (Vector3f(0, 0, 1).dot(body_z));
 	collective_thrust = math::min(collective_thrust, -_lim_thr_min);
 	_thr_sp = body_z * collective_thrust;
+	//this thrust only depends of the Z axis
+
 }
+
+void PositionControl::_omni_accelerationControl()
+{
+	//divide by acceleration
+	Vector3f body_z = Vector3f(0, 0, CONSTANTS_ONE_G).normalized();
+	Vector3f thrz;
+	float collective_thrust = _acc_sp(2) * (_hover_thrust / CONSTANTS_ONE_G) - _hover_thrust;
+
+	float x_thrust= _acc_sp(0)*_hover_thrust;
+	float y_thrust= _acc_sp(1)*_hover_thrust;
+
+	collective_thrust /= (Vector3f(0, 0, 1).dot(body_z));
+	collective_thrust = math::min(collective_thrust, -_lim_thr_min);
+	thrz= body_z * collective_thrust;
+
+	// Project thrust to planned body attitude
+	_thr_sp(0) = x_thrust;
+	_thr_sp(1) = y_thrust;
+	_thr_sp(2) =thrz(2);
+
+	//this thrust only depends of the Z axis
+}
+
 
 bool PositionControl::_inputValid()
 {

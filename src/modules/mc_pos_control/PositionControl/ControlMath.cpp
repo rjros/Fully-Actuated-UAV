@@ -53,7 +53,7 @@ void thrustToAttitude(const Vector3f &thr_sp, const float yaw_sp, const matrix::
 	if (omni_att_mode > 6 || omni_att_mode < 0) {
 		PX4_ERR("OMNI_ATT_MODE parameter set to unknown value!");
 	}
-
+	//check value for the switch
 	switch (omni_att_mode) {
 	case 3:
 		bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
@@ -140,6 +140,8 @@ void thrustToZeroTiltAttitude(const Vector3f &thr_sp, const float yaw_sp, const 
 	att_sp.thrust_body[0] = thr_sp.dot(body_x);
 	att_sp.thrust_body[1] = thr_sp.dot(body_y);
 	att_sp.thrust_body[2] = thr_sp.dot(body_z);
+
+
 }
 
 void limitTilt(Vector3f &body_unit, const Vector3f &world_unit, const float max_angle)

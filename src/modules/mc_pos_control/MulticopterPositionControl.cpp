@@ -486,7 +486,7 @@ void MulticopterPositionControl::Run()
 			_control.setState(states);
 
 			// Run position control
-			if (_control.update(dt)) {
+			if (_control.update(dt,_param_omni_att_mode.get())) {
 				_failsafe_land_hysteresis.set_state_and_update(false, time_stamp_now);
 
 			} else {
@@ -508,7 +508,7 @@ void MulticopterPositionControl::Run()
 
 				_control.setInputSetpoint(failsafe_setpoint);
 				_control.setVelocityLimits(_param_mpc_xy_vel_max.get(), _param_mpc_z_vel_max_up.get(), _param_mpc_z_vel_max_dn.get());
-				_control.update(dt);
+				_control.update(dt,_param_omni_att_mode.get());
 			}
 
 			// Publish internal position control setpoints
@@ -544,8 +544,6 @@ void MulticopterPositionControl::Run()
 			//Add condition for selecting between rc or saved condition
 			omni_status.att_mode = _param_omni_att_mode.get();
 			omni_status.att_mode=switches.omni_switch;
-
-
 
 
 			_omni_attitude_status_pub.publish(omni_status);
