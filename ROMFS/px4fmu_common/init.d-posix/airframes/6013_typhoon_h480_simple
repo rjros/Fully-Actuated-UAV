@@ -11,10 +11,13 @@ param set-default MAV_TYPE 13
 
 param set-default SYS_CTRL_ALLOC 1
 
+<<<<<<< HEAD
 param set-default CA_AIRFRAME 0
 param set-default CA_ROTOR_COUNT 7
 
 
+=======
+>>>>>>> db5f85c3d6e0897736c5d19f762adc764571f73e
 param set-default MC_PITCHRATE_P 0.0800
 param set-default MC_PITCHRATE_I 0.0400
 param set-default MC_PITCHRATE_D 0.0010
@@ -30,11 +33,21 @@ param set-default MPC_XY_VEL_P_ACC 3
 param set-default RTL_DESCEND_ALT 10
 param set-default RTL_LAND_DELAY 0
 
+<<<<<<< HEAD
 # param set-default TRIG_INTERFACE 3
 # param set-default TRIG_MODE 4
 # param set-default MNT_MODE_IN 0
 # param set-default MAV_PROTO_VER 2
 
+=======
+param set-default TRIG_INTERFACE 3
+param set-default TRIG_MODE 4
+param set-default MNT_MODE_IN 0
+param set-default MAV_PROTO_VER 2
+
+param set-default CA_AIRFRAME 0
+param set-default CA_ROTOR_COUNT 6
+>>>>>>> db5f85c3d6e0897736c5d19f762adc764571f73e
 
 param set-default CA_ROTOR0_PX 0.0
 param set-default CA_ROTOR0_PY 1.0
@@ -64,6 +77,7 @@ param set-default CA_ROTOR4_KM 0.05
 param set-default CA_ROTOR5_PX -0.866025
 param set-default CA_ROTOR5_PY -0.5
 param set-default CA_ROTOR5_KM -0.05
+<<<<<<< HEAD
 param set-default CA_ROTOR6_PX 0.0
 param set-default CA_ROTOR6_PY 0.0
 param set-default CA_ROTOR6_PZ 0.0
@@ -72,6 +86,8 @@ param set-default CA_ROTOR6_AX -1.0
 param set-default CA_ROTOR6_AY 0.0
 param set-default CA_ROTOR6_AZ 0.0
 param set-default CA_ROTOR6_CT 3.25
+=======
+>>>>>>> db5f85c3d6e0897736c5d19f762adc764571f73e
 
 param set-default PWM_MAIN_FUNC1 101
 param set-default PWM_MAIN_FUNC2 102
@@ -79,13 +95,17 @@ param set-default PWM_MAIN_FUNC3 103
 param set-default PWM_MAIN_FUNC4 104
 param set-default PWM_MAIN_FUNC5 105
 param set-default PWM_MAIN_FUNC6 106
+<<<<<<< HEAD
 param set-default PWM_MAIN_FUNC7 107
 
+=======
+>>>>>>> db5f85c3d6e0897736c5d19f762adc764571f73e
 
 
 #disable MC desaturation which improves attitude tracking
 param set-default CA_METHOD 1
 
+<<<<<<< HEAD
 # disable attitude failure detection
 param set-default FD_FAIL_P 0
 param set-default FD_FAIL_R 0
@@ -93,5 +113,7 @@ param set-default FD_FAIL_R 0
 #Set omni parameters
 param set OMNI_ATT_MODE 1
 
+=======
+>>>>>>> db5f85c3d6e0897736c5d19f762adc764571f73e
 set MIXER skip
 set MIXER_AUX none
