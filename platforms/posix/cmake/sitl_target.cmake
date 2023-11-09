@@ -181,7 +181,8 @@ set(models
 	typhoon_h480_dual
 	uuv_hippocampus
 	omnicopter # added additional model for simulation
-	fully_actuated #added additional model for simulation
+	fully_actuated
+	iris_4edf#added additional model for simulation
 	#edf test platform
 )
 

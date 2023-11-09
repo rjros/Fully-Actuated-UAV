@@ -242,4 +242,9 @@ private:
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+
+
+	//Custom parameters
+	float _xy_factor{0.7};// Analogous to the hover thrust multiplier
+
 };

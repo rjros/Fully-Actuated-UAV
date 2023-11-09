@@ -536,10 +536,10 @@ void MulticopterPositionControl::Run()
 			///////////////////////////////////////////////////////////
 			//Add condition for selecting between rc or saved condition
 			//Get omni mode from rc
-			param_t param = param_handle(px4::params::OMNI_ATT_MODE);
-			manual_control_switches_sub.update(&switches);
-			int32_t value= switches.omni_switch;
-			param_set(param,&value);
+			// param_t param = param_handle(px4::params::OMNI_ATT_MODE);
+			// manual_control_switches_sub.update(&switches);
+			// int32_t value= switches.omni_switch;
+			// param_set(param,&value);
 			///////////////////////////////////////////////////////////
 			//Add condition for selecting between rc or saved condition
 			omni_status.att_mode = _param_omni_att_mode.get();

@@ -73,6 +73,7 @@ px4_add_romfs_files(
 	1070_boat
 	1111_fully_actuated
 	10019_omnicopter
+	10021_iris_4edf
 	3010_quadrotor_x
 	3011_hexarotor_x
 	17001_tf-g1
